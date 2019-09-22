@@ -6,6 +6,7 @@
  */ 
 
 #include <avr/io.h>
+#include <avr/interrupt.h>
 
 #define LCD_ADDRESS 0x20
 
@@ -15,31 +16,28 @@ typedef struct Ultrasonic_t {
 	struct Ultrasonic* newData;
 } Ultrasonic;
 
-void querySensors(Ultrasonic* leftSensor, Ultrasonic* rightSensor)
-{
-	register int *lower_time asm("r24");
-	register int *upper_time asm("r25");
+uint16_t querySensors(Ultrasonic* leftSensor, Ultrasonic* rightSensor)
+{	
+	PORTC = 0xFF;
+	PORTB = 0xF0;
+	uint16_t time = 0;
+	uint8_t inc = 0;
+	while(inc++ != 0xF);
+	PORTB = 0x0F;
+	PORTC = 0x7F;
+	while(PINC != 0x00) {
+		//PORTB = PINC;
+		//time += 8;
+	}
 	
-	PORTB = 0x42;
-	while(PINB == 0x42);
-	
-	//TODO: Maybe use hardware interrupts when learned
-	__asm("loop:");
-	__asm("IN r20, 0x16");
-	__asm("CPI r20, 0x42");
-	__asm("BRNE FIND_HIGH");
-	
-	__asm("FIND_HIGH:");
-	__asm("CPI r20, 0xC3");
-	__asm("BRNE CHECK_LEFT");
-	__asm("ADIW r24, 0x4");
-	__asm("RJMP loop");
-	
-	__asm("CHECK_LEFT:");
-	__asm("ANDI r20, 0x40");
-	__asm("BRNE CHECK_RIGHT")
-	
-	__asm("END: NOP");
+	return time;
+}
+
+uint8_t timeToDistance(uint16_t time) {
+	uint16_t distance;
+	time = time * 100;
+	distance = time * 2;
+	return distance;
 }
 
 int main(void)
@@ -47,13 +45,14 @@ int main(void)
     Ultrasonic leftSensor;
     Ultrasonic rightSensor;
     /*10111101*/
-    DDRB = 0xBD;
+    DDRC = 0x80;
 	//Enable pull-up resistors
 	/*01000010*/
-	PINB = 0x42;
-	
-	querySensors(&leftSensor, &rightSensor);
-	
+	PORTC = 0x7F;
+	DDRB = 0xFF;
+	uint16_t time = querySensors(&leftSensor, &rightSensor);
+	uint8_t distance = timeToDistance(time);
+	PORTB = distance;
     while (1) 
     {
 		
