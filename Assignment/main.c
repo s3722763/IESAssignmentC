@@ -9,13 +9,13 @@
 #include <avr/interrupt.h>
 #include "TWI.h"
 
-#define LCD_ADDRESS 0x27
-
 typedef struct Ultrasonic_t {
 	uint16_t distance;
 	uint16_t time;
 	struct Ultrasonic* newData;
 } Ultrasonic;
+
+void initLCD(void);
 
 int main(void)
 {
@@ -31,3 +31,6 @@ int main(void)
     }
 }
 
+void initLCD(void) {
+	
+}
