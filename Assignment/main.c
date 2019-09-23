@@ -12,6 +12,9 @@
 #define WRITE 0xFE
 //For 50 kHz
 #define I2C_RATE_REGISTER 0x70
+#define I2C_GOOD_START 0x08
+#define I2C_ADDRESS_SEND_SUCCESS 0x18
+#define I2C_DATA_SEND_SUCCESS 0x28
 
 typedef struct Ultrasonic_t {
 	uint16_t distance;
@@ -22,8 +25,10 @@ typedef struct Ultrasonic_t {
 void setBaudRate(void) {
 	//Setup baudrate
 	TWSR = 0x00;
+	
 	TWBR = I2C_RATE_REGISTER;
 	TWCR = (1 << TWEN);
+	TWDR = 0xFF;
 }
 
 void error(uint8_t code) {
@@ -33,38 +38,39 @@ void error(uint8_t code) {
 
 void twiStart(void) {
 	//Send START condition
-	uint8_t current_status = TWSR;
-	TWCR = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
+	uint8_t a = (1 << TWINT) | (1 << TWSTA) | (1 << TWEN);
+	TWCR = a;
 	//Wait for start condition to be fully transmitted
-	while(!(TWCR & ((1 << TWINT) | (1 << TWEN))));
-	if ((TWSR & 0xF8) != current_status) {
-		error(0x1);
+	while(!(TWCR & (1 << TWINT))) {}
+		//Check to see what the status register must be
+	if ((TWSR & 0xF8) != I2C_GOOD_START) {
+		error(TWSR);
 	}
 }
 
 void twiSendAddress(void) {
-	uint8_t current_status = TWSR;
 	uint8_t toSend = (LCD_ADDRESS << 1) & WRITE; // 7 bit address and write bit as LSB as 0
 	TWDR = toSend;
 	TWCR = (1 << TWINT) | (1 << TWEN); //Send address
-	while(!(TWCR & ((1 << TWINT) | (1 << TWEN )))); // Wait until sent
-	if ((TWSR & 0xF8) != current_status) {
-		error(0x2);
+	while(!(TWCR & (1 << TWINT))); // Wait until sent
+	if ((TWSR & 0xF8) != I2C_ADDRESS_SEND_SUCCESS) {
+		error(TWSR);
 	}
 }
 
 void twiSentData(uint8_t data) {
-	uint8_t current_status = TWSR;
 	TWDR = data; //Set data to be sent
 	TWCR = (1 << TWINT) | (1 << TWEN); //Send data
-	while(!(TWCR & ((1 << TWINT) | (1 << TWEN )))); // Wait until sent
-	if ((TWSR & 0xF8) != current_status) {
-		error(0x1);
+	while(!(TWCR & (1 << TWINT))); // Wait until sent
+	if ((TWSR & 0xF8) != I2C_DATA_SEND_SUCCESS ) {
+		error(TWSR);
 	}
 }
 
 void twiStop(void) {
 	TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO);
+	PORTB = 0xFF;
+	while(!(TWCR & (1 << TWINT))) {}
 }
 
 void sendTWI(uint8_t msg) {
@@ -81,9 +87,8 @@ void sendTWI(uint8_t msg) {
 int main(void)
 {
     Ultrasonic leftSensor;
-    Ultrasonic rightSensor;
+    Ultrasonic rightSensor;	
 	DDRB = 0xFF;
-	sei();
 	setBaudRate();
 	sendTWI(0xF0);
 	
