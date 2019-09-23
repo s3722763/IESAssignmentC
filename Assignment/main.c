@@ -15,15 +15,12 @@ typedef struct Ultrasonic_t {
 	struct Ultrasonic* newData;
 } Ultrasonic;
 
-void initLCD(void);
-
 int main(void)
 {
     Ultrasonic leftSensor;
     Ultrasonic rightSensor;	
 	DDRB = 0xFF;
 	setBaudrate();
-	twiSend(LCD_ADDRESS, 'a');
 	
     while (1) 
     {

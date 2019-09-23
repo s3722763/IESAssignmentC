@@ -5,6 +5,8 @@
  *  Author: Daniel
  */ 
 
+#include "LCD.h"
+
 void wait41ms(void);
 
 void sendNibble(uint8_t nibble) {
@@ -32,7 +34,7 @@ void initLCD(void) {
 void wait41ms(void) {
 	__asm("PUSH r16");
 	__asm("PUSH r17");
-	__asm("LDI r17, 0xC1")
+	__asm("LDI r17, 0xC1");
 	__asm("loop1: ");
 	__asm("DEC r16");
 	__asm("CPI r16, 0x0");
