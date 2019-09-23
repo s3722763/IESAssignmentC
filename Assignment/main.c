@@ -69,8 +69,6 @@ void twiSentData(uint8_t data) {
 
 void twiStop(void) {
 	TWCR = (1 << TWINT) | (1 << TWEN) | (1 << TWSTO);
-	PORTB = 0xFF;
-	while(!(TWCR & (1 << TWINT))) {}
 }
 
 void sendTWI(uint8_t msg) {
