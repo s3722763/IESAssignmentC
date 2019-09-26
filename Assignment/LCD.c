@@ -24,11 +24,25 @@ void lcdSend(uint8_t cmd) {
 void initLCD(void) {
 	lcdSend(0x00);
 	//Set to 4 bit mode
-	lcdSend(0x03);
+	sendNibble(0x3);
 	// Wait > 4.1ms
-	lcdSend(0x03);
+	sendNibble(0x3);
 	// Wait > 100 us
-	lcdSend(0x03);
+	sendNibble(0x3);
+	sendNibble(BIT_MODE);
+	lcdSend(FUNCTION_SET);
+	lcdSend(DISPLAY_OFF);
+	lcdSend(CLEAR_DISPLAY);
+	lcdSend(ENTRY_MODE);
+}
+
+void sendCharacterLCD(uint8_t character, uint8_t line) {
+	
+}
+
+void sendNumberLCD(uint8_t number, uint8_t line) {
+	uint8_t address = NUMBER_BASE_ADDRESS + number;
+	lcdSend(address, );
 }
 
 void wait41ms(void) {
