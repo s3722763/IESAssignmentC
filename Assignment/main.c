@@ -12,18 +12,18 @@
 #include <util/delay.h>
 
 uint8_t volatile got_distance = 0;
-uint8_t volatile was_high = 0;
+uint8_t volatile is_high = 0;
 
 ISR(INT1_vect) {
 	if (was_high == 1) {
 		//Stop timer
 		TCCR1B = 0;
 		got_distance = 1;
-		was_high = 0;
+		is_high = 0;
 	} else {
 		//Start timer
 		TCCR1B |= (1 << CS10);
-		was_high = 1;
+		is_high = 1;
 	}
 }
 
