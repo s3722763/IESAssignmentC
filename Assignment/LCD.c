@@ -7,33 +7,50 @@
 
 #include "LCD.h"
 
-void wait41ms(void);
+void display_reset(void);
 
-void sendNibble(uint8_t nibble) {
-	twiSend(LCD_ADDRESS, (nibble | EN));
-	twiSend(LCD_ADDRESS, nibble);
+void sendNibble(uint8_t nibble, uint8_t is_char) {
+	uint8_t options = EN;
+	if (is_char) {
+		options |= RS;
+	}
+	options |= BACKLIGHT_CMD;
+	twiSend(LCD_ADDRESS, (nibble | options));
+	PORTB = (nibble | options);
+	options ^= EN;
+	twiSend(LCD_ADDRESS, nibble | options);
 }
 
-void lcdSend(uint8_t cmd) {
+void lcdSend(uint8_t cmd, uint8_t is_char) {
 	uint8_t to_send = cmd & 0xF0;
-	sendNibble(to_send);
+	sendNibble(to_send, is_char);
 	to_send = (cmd << 4) & 0xF0;
-	sendNibble(to_send);
+	sendNibble(to_send, is_char);
 }
 
 void initLCD(void) {
-	lcdSend(0x00);
+	_delay_ms(15);
+	lcdSend(0x00, 0);
 	//Set to 4 bit mode
-	sendNibble(0x3);
+	sendNibble(0x3, 0);
 	// Wait > 4.1ms
-	sendNibble(0x3);
+	_delay_ms(5);
+	sendNibble(0x3, 0);
+	_delay_us(200);
 	// Wait > 100 us
-	sendNibble(0x3);
-	sendNibble(BIT_MODE);
-	lcdSend(FUNCTION_SET);
-	lcdSend(DISPLAY_OFF);
-	lcdSend(CLEAR_DISPLAY);
-	lcdSend(ENTRY_MODE);
+	sendNibble(BIT_MODE, 0);
+	_delay_us(200);
+	lcdSend(FUNCTION_SET, 0);
+	display_reset();
+}
+
+void display_reset(void) {
+	lcdSend(DISPLAY_ON, 0);
+	_delay_us(37);
+	lcdSend(CLEAR_DISPLAY, 0);
+	_delay_ms(1.5);
+	lcdSend(ENTRY_MODE, 0);
+	_delay_us(37);
 }
 
 void sendCharacterLCD(uint8_t character, uint8_t line) {
@@ -42,18 +59,5 @@ void sendCharacterLCD(uint8_t character, uint8_t line) {
 
 void sendNumberLCD(uint8_t number, uint8_t line) {
 	uint8_t address = NUMBER_BASE_ADDRESS + number;
-	lcdSend(address, );
-}
-
-void wait41ms(void) {
-	__asm("PUSH r16");
-	__asm("PUSH r17");
-	__asm("LDI r17, 0xC1");
-	__asm("loop1: ");
-	__asm("DEC r16");
-	__asm("CPI r16, 0x0");
-	__asm("BRNE loop1");
-	__asm("DEC r17");
-	__asm("CPI r17, 0x0");
-	__asm("BRNE loop1");
+	lcdSend(address, 0);
 }

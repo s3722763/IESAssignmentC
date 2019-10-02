@@ -7,7 +7,7 @@
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "TWI.h"
+#include "LCD.h"
 
 typedef struct Ultrasonic_t {
 	uint16_t distance;
@@ -20,14 +20,13 @@ int main(void)
     Ultrasonic leftSensor;
     Ultrasonic rightSensor;	
 	DDRB = 0xFF;
+	
 	setBaudrate();
+	initLCD();
+	
 	
     while (1) 
     {
 		
     }
-}
-
-void initLCD(void) {
-	
 }

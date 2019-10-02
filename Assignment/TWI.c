@@ -16,8 +16,7 @@ void setBaudrate(void) {
 }
 
 void error(uint8_t code) {
-	PORTB = code;
-	while(1);
+	//PORTB = code;
 }
 
 void twiStart(void) {
