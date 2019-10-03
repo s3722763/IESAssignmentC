@@ -24,11 +24,11 @@ int main(void)
     Ultrasonic rightSensor;	
 	DDRB = 0xFF;
 	
-	//setBaudrate();
-	//initLCD();
-	uint8_t num = 123;
-	uint8_t res[3];
-	three_digit_to_str(num, res);
+	setBaudrate();
+	initLCD();
+	//uint8_t num = 123;
+	//uint8_t res[3];
+	//three_digit_to_str(num, res);
 	
     while (1) 
     {

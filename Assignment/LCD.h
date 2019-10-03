@@ -25,8 +25,8 @@
 //4 Bit mode 
 #define BIT_MODE 0x02
 //2 for function set, C for  number of lines and size (5 * 8)
-#define FUNCTION_SET 0x2C
-#define DISPLAY_ON 0x08 
+#define FUNCTION_SET 0x20
+#define DISPLAY_ON 0x0C 
 #define CLEAR_DISPLAY 0x01
 #define ENTRY_MODE 0x06
 #define NUMBER_BASE_ADDRESS 0x30
@@ -34,5 +34,7 @@
 
 void initLCD(void);
 void sendCharacterLCD(uint8_t character);
+void display_reset(void);
+void go_home(void);
 
 #endif /* LCD_H_ */
