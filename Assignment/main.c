@@ -6,8 +6,8 @@
  */ 
 
 #include <avr/io.h>
-
-#define LCD_ADDRESS 0x20
+#include <avr/interrupt.h>
+#include "LCD.h"
 
 typedef struct Ultrasonic_t {
 	uint16_t distance;
@@ -15,48 +15,36 @@ typedef struct Ultrasonic_t {
 	struct Ultrasonic* newData;
 } Ultrasonic;
 
-void querySensors(Ultrasonic* leftSensor, Ultrasonic* rightSensor)
-{
-	register int *lower_time asm("r24");
-	register int *upper_time asm("r25");
-	
-	PORTB = 0x42;
-	while(PINB == 0x42);
-	
-	//TODO: Maybe use hardware interrupts when learned
-	__asm("loop:");
-	__asm("IN r20, 0x16");
-	__asm("CPI r20, 0x42");
-	__asm("BRNE FIND_HIGH");
-	
-	__asm("FIND_HIGH:");
-	__asm("CPI r20, 0xC3");
-	__asm("BRNE CHECK_LEFT");
-	__asm("ADIW r24, 0x4");
-	__asm("RJMP loop");
-	
-	__asm("CHECK_LEFT:");
-	__asm("ANDI r20, 0x40");
-	__asm("BRNE CHECK_RIGHT")
-	
-	__asm("END: NOP");
-}
+uint8_t single_num_to_char(uint8_t num);
+void three_digit_to_str(uint8_t num, uint8_t* result);
 
 int main(void)
 {
     Ultrasonic leftSensor;
-    Ultrasonic rightSensor;
-    /*10111101*/
-    DDRB = 0xBD;
-	//Enable pull-up resistors
-	/*01000010*/
-	PINB = 0x42;
+    Ultrasonic rightSensor;	
+	DDRB = 0xFF;
 	
-	querySensors(&leftSensor, &rightSensor);
+	setBaudrate();
+	initLCD();
+	//uint8_t num = 123;
+	//uint8_t res[3];
+	//three_digit_to_str(num, res);
 	
     while (1) 
     {
-		
+		__asm("NOP");
     }
 }
 
+void three_digit_to_str(uint8_t number, uint8_t* result) {
+	uint8_t h = number / 100;
+	uint8_t t = (number / 10) - (h * 10);
+	uint8_t o = number - (t * 10) - (h * 100);
+	result[0] = single_num_to_char(o);
+	result[1] = single_num_to_char(t);
+	result[2] = single_num_to_char(h);
+}
+
+uint8_t single_num_to_char(uint8_t num) {
+	return num | 0x30;
+}
