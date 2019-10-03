@@ -16,7 +16,6 @@ void sendNibble(uint8_t nibble, uint8_t is_char) {
 	}
 	options |= BACKLIGHT_CMD;
 	twiSend(LCD_ADDRESS, (nibble | options));
-	PORTB = (nibble | options);
 	_delay_us(1);
 	options ^= EN;
 	twiSend(LCD_ADDRESS, nibble | options);

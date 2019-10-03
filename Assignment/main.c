@@ -19,25 +19,24 @@ uint8_t volatile got_distance = 0;
 uint8_t volatile is_high = 0;
 
 ISR(INT1_vect) {
-	if (was_high == 1) {
+	if (is_high == 1) {
 		//Stop timer
 		TCCR1B = 0;
 		got_distance = 1;
 		is_high = 0;
 	} else {
 		//Start timer
-		TCCR1B |= (1 << CS10);
+		TCCR1B |= (1 << CS11);
 		is_high = 1;
 	}
 }
 
 uint16_t querySensors()
 {	
-	uint8_t i;
-	PORTC = 0x01;
+	PORTB = 0x01;
 	//About 10 us
 	_delay_us(10);
-	PORTC = 0x00;
+	PORTB = 0x00;
 	
 	got_distance = 0;
 	while(got_distance == 0);
@@ -50,15 +49,16 @@ uint16_t querySensors()
 
 uint8_t timeToDistance(uint16_t time) {
 	uint8_t distance;
-	distance = time / 696;
+	distance = time / 87;
 	return distance;
 }
 
 int main(void)
 {
-	DDRB = 0xFF;
+	uint8_t i;
+	DDRB = 0x01;
 	DDRD = 0b11110111;
-  DDRC = 0x01;
+	DDRC |= (0x01);
 
 	PORTB = 0x00;
 	PORTC = 0x00;
@@ -74,21 +74,27 @@ int main(void)
 	while (1) {
 		uint16_t time_s = querySensors();
 		uint8_t distance = timeToDistance(time_s);
-		PORTB = distance;
-		_delay_ms(50);
-	}
+		
+		uint8_t chars[3];
+		
+		three_digit_to_str(distance, chars);
+		display_reset();
+		for (i = 0; i < 3; i++) {
+			sendCharacterLCD(chars[i]);
+		}
+		
+		_delay_ms(1000);
 	
-	//serialSend(distance);
-  while (1);
+	}
 }
 
 void three_digit_to_str(uint8_t number, uint8_t* result) {
 	uint8_t h = number / 100;
 	uint8_t t = (number / 10) - (h * 10);
 	uint8_t o = number - (t * 10) - (h * 100);
-	result[0] = single_num_to_char(o);
+	result[2] = single_num_to_char(o);
 	result[1] = single_num_to_char(t);
-	result[2] = single_num_to_char(h);
+	result[0] = single_num_to_char(h);
 }
 
 uint8_t single_num_to_char(uint8_t num) {
