@@ -53,11 +53,19 @@ void display_reset(void) {
 	_delay_us(37);
 }
 
-void sendCharacterLCD(uint8_t character, uint8_t line) {
-	
+void go_home(void) {
+	lcdSend(HOME_CMD, 0);
+	_delay_ms(2);
 }
 
-void sendNumberLCD(uint8_t number, uint8_t line) {
+void sendCharacterLCD(uint8_t character) {
+	//Address is just the ascii value for the character
+	lcdSend(character, 1);
+	_delay_us(5);	
+}
+
+/*void sendNumberLCD(uint8_t number, uint8_t line) {
 	uint8_t address = NUMBER_BASE_ADDRESS + number;
 	lcdSend(address, 0);
-}
+	_delay_us(5);
+}*/

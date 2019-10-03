@@ -30,11 +30,9 @@
 #define CLEAR_DISPLAY 0x01
 #define ENTRY_MODE 0x06
 #define NUMBER_BASE_ADDRESS 0x30
-#define CAPITAL_BASE_ADRESS 0x41
-#define LOWER_CASE_BASE_ADDRESS 0x61
+#define HOME_CMD 0x02
 
 void initLCD(void);
-void sendCharacterLCD(uint8_t character, uint8_t line);
-void sendNumberLCD(uint8_t number, uint8_t line);
+void sendCharacterLCD(uint8_t character);
 
 #endif /* LCD_H_ */
